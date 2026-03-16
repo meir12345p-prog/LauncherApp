@@ -1,0 +1,111 @@
+import express from 'express'
+import launchersData from '../model/launchersModel.js'
+const router = express.Router()
+
+
+router.post('/' , async (req , res) =>{
+    try{
+         const {city , rocketType , latitude , longitude , name} = req.body
+         if(!city || !rocketType || !latitude || !longitude ||!name){
+            return res.status(400).json({error : 'missing input'})
+         }
+         if(!typeof city === String|| !typeof rocketType === String || !typeof name ===String ){
+           return  res.status(400).json({error : 'name city and rocketType need to be string'})
+
+         }
+
+         if(!typeof latitude === Number || !typeof longitude === Number){
+            res.status(400).json({error:'latitude and longitude need to be numbers'})
+         }
+
+         const launcher = await launchersData.create({
+            city,
+            rocketType,
+            latitude,
+            longitude,
+            name
+         })
+
+         res.status(200).json({message : 'rocket created successfully' , roket : launcher})
+    
+    }catch(err){
+        res.status(500).json({error : err.message})
+    }
+    
+})
+
+router.get('/' , async (req , res) =>{
+    try{
+
+        const allLaunchers = await launchersData.find({})
+        res.status(201).json({launchers : allLaunchers})
+    }catch(err){
+        res.status(500).json({error:err.message})
+    }
+})
+
+router.get('/:id' , async (req , res) =>{
+    try{
+        const {id} = req.params
+        const launcher = await launchersData.findById(id)
+        if(!launcher){
+            return res.status(404).json({error:'launcher not found'})
+        }
+        res.status(201).json({launchers : launcher})
+    }catch(err){
+        res.status(500).json({error:err.message})
+    }
+})
+
+router.delete('/:id' , async (req , res) =>{
+    try{
+        const { id} = req.params
+        const deleteLauncher = await launchersData.findByIdAndDelete(id)
+        res.status(201).json({message : `launcher deleted successfully` , launter : deleteLauncher })
+    }catch(err){
+        res.status(500).json({error:err.message})
+    }
+})
+
+router.put('/:id' , async (req , res) =>{
+    try{
+        const {id} = req.params
+        const {city , rocketType , latitude , longitude , name} = req.body        
+        if(!city && !rocketType && !latitude && !longitude && !name){
+            return res.status(400).json({error: 'not input to change'})
+        }
+        if(city){
+            const launcher = await launchersData.findById(id)
+            launcher.city = city
+            await launcher.save()
+
+        }
+        if(rocketType){
+            const launcher = await launchersData.findById(id)
+            launcher.rocketType = rocketType
+            await launcher.save()
+        }
+        if(latitude){
+            const launcher = await launchersData.findById(id)
+            launcher.latitude = latitude
+            await launcher.save()
+        }
+        if(longitude){
+            const launcher = await launchersData.findById(id)
+            launcher.longitude = longitude
+            await launcher.save()
+        }
+        if(name){
+            const launcher = await launchersData.findById(id)
+            launcher.name = name
+            await launcher.save()
+        }
+        const launcher = await launchersData.findById(id)
+        
+        res.status(201).json({message : `update successful refresh for changes` , launter : launcher })
+    }catch(err){
+        res.status(500).json({error:err.message})
+    }
+})
+
+export default router
