@@ -1,9 +1,10 @@
 import express from 'express'
 import launchersData from '../model/launchersModel.js'
+import authMiddleWare from '../middleware/authMiddleWare.js'
 const router = express.Router()
 
 
-router.post('/' , async (req , res) =>{
+router.post('/',authMiddleWare , async (req , res) =>{
     try{
          const {city , rocketType , latitude , longitude , name} = req.body
          if(!city || !rocketType || !latitude || !longitude ||!name){
