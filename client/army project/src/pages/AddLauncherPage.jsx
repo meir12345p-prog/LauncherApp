@@ -10,6 +10,7 @@ function AddLauncherPage() {
     const [latitude , setLatitude] = useState(null)
     const [longitude , setLongitude] = useState(null)
     const [city , setCity] = useState('')
+    const [destroyed , setDestroyed] = useState('')
     const [error , setError] = useState('')
     const [success , setSuccess] = useState('')
     
@@ -21,13 +22,15 @@ function AddLauncherPage() {
 
 
     try{
-        const data = await axios.post('http://localhost:3016/api/launchers' ,{
+        const token = localStorage.getItem('token')
+        const data = await axios.post('http://localhost:3019/api/launchers' ,{
             city,
             rocketType,
             latitude,
             longitude,
-            name
-        })
+            name,
+            destroyed
+        },{headers:{Authorization:`Bearer ${token}`}})
         console.log(data.data.message);
         setSuccess(data.data.message)
         
@@ -39,6 +42,30 @@ function AddLauncherPage() {
     }
         
     }
+            async function userInfo(event) {
+         event.preventDefault()
+
+         try{
+            const token = localStorage.getItem('token')
+            const res = await axios.get('http://localhost:3019/api/auth/getUser',{
+            headers: {Authorization :`Bearer ${token}` }
+        })
+            const {username , user_type} = res.data
+            console.log(res.data);
+            
+            alert(`you are ${username} and your user type is ${user_type}`)
+         }catch(err){
+            console.log(err);    
+         }
+    } 
+        function handleClick() {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        
+    }
+          function HomePage() {
+        navigate('/api/launchers')
+    }
 
    
 
@@ -46,7 +73,11 @@ function AddLauncherPage() {
     <section>
     <nav className='nav'>
             <h1>Add launcher Page</h1>
-           <Link to={'/'}><button>Home Page</button></Link>    
+           <div>
+                   <button onClick={HomePage}>Home Page</button>
+                   <button onClick={userInfo}>user info</button>
+                   <Link to={'/'}><button onClick={handleClick}>logout</button></Link>
+             </div>
         </nav>
     <div className='add-container'>
         
@@ -65,6 +96,14 @@ function AddLauncherPage() {
                     <option value="Radwan">Radwan</option>
                     <option value="Kheibar">Kheibar</option>
                 </select>
+            </div>
+             <div  className='input'>
+                <label>destroyed :</label>
+                <select onChange={(e) => setDestroyed(e.target.value)}>
+                    <option value="" disabled>select destroyed</option>
+                    <option value="true">destroyed</option>
+                    <option value="false">Not destroyed</option>
+                </select> 
             </div>
              <div className='input'>
                 <label>latitude:</label>

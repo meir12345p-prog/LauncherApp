@@ -1,14 +1,14 @@
 import React from 'react'
 import AuthUserStore from './AuthUserStore'
 import { Navigate } from 'react-router'
-
-function ProtectedRoute({children}) {
+function ProtectedRouteFromAir({children}) {
     const token = AuthUserStore((state)=> state.token)
-    if(!token){
+    const user = AuthUserStore((state) => state.user)
+    
+    if(!token || user.user_type === 'air-army'){
        return <Navigate to='/api/launchers'/>
     }
 
   return children
 }
-
-export default ProtectedRoute
+export default ProtectedRouteFromAir

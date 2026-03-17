@@ -18,7 +18,7 @@ app.use('/api/launchers' , launchersRoute)
 
 async function serverStart (){
     try{
-    const connetToBd = connect()
+    const connetToBd = await connect()
     if(connetToBd){
         app.listen(PORT , ()=>{
     console.log(`server running at port ${PORT}`);

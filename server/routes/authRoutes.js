@@ -6,22 +6,26 @@ import authMiddleWare from '../middleware/authMiddleWare.js'
 
 const auth = express.Router()
 
-auth.post('/' , async (req , res) =>{
+auth.post('/login' , async (req , res) =>{
     
     try{
     const {username , password} = req.body
+    
     if(!username ||!password){
         return res.status(400).json({error:'missing username or password'})       
     }
 
     const user = await usersData.findOne({username , password})
+
+    
     if(!user){
         return res.status(400).json({error:'user not found'})
-    }
+    }    
         user.last_login = new Date().toISOString()
         await user.save()
 
     const token = jwt.sign({
+        _id: user._id,
         username : user.username,
         email : user.email,
         user_type : user.user_type,
@@ -29,10 +33,10 @@ auth.post('/' , async (req , res) =>{
 
     },process.env.SECRET_KEY)
 
-    res.status(200).json({ token : token , user : {username : username ,email : email , user_type : user_type}})
+    res.status(200).json({ token : token , user : {id : user._id ,username : username ,email : user.email , user_type : user.user_type}})
 
 }catch(err){
-    res.status(500).json({error : err})
+    res.status(500).json({error : err.message})
 }
 
 
@@ -61,11 +65,11 @@ auth.post('/register/create',authMiddleWare , async (req, res)=>{
 }
 })
 
-auth.delete('/register/delete/:id',authMiddleWare , async (req , res) =>{
+auth.delete('/register/delete/:id',authMiddleWare, async (req , res) =>{
     try{
         const { id} = req.params
         const deleteUser = await usersData.findByIdAndDelete(id)
-        res.status(201).json({message : `user deleted successfully` , launter : deleteLauncher })
+        res.status(201).json({message : `user deleted successfully` , user : deleteUser })
     }catch(err){
         res.status(500).json({error:err.message})
     }
@@ -73,33 +77,37 @@ auth.delete('/register/delete/:id',authMiddleWare , async (req , res) =>{
 
 auth.put('/register/update',authMiddleWare , async (req , res) =>{
     try{
-    
-        const {username , password , email , user_type} = req.body        
+        const {_id} = req.payload
+
+        
+        const {username , password , email , user_type} = req.body  
+     
+              
         if(!username && !password && !email && !user_type){
             return res.status(400).json({error: 'not input to change'})
         }
         if(username){
-            const user = await usersData.findById(id)
+            const user = await usersData.findById(_id)
             user.username = username
             await user.save()
 
         }
         if(password){
-            const user = await usersData.findById(id)
+            const user = await usersData.findById(_id)
             user.password = password
             await user.save()
         }
         if(email){
-            const user = await usersData.findById(id)
+            const user = await usersData.findById(_id)
             user.email = email
             await user.save()
         }
         if(user_type){
-            const user = await usersData.findById(id)
+            const user = await usersData.findById(_id)
             user.user_type = user_type
             await user.save()
         }
-        const user = await usersData.findById(id)
+        const user = await usersData.findById(_id)
         
         res.status(201).json({message : `update successful refresh for changes` , user : user })
     }catch(err){

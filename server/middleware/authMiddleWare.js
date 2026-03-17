@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken'
 import 'dotenv/config'
 export default function authMiddleWare(req , res , next) {
+                      
+        const authHeader = req.headers.authorization
 
-        const authHeader = req.headers.authoriztion
-
-        if(!authHeader || !authHeader.startWhit('Bearer')){
+        if(!authHeader || !authHeader.startsWith('Bearer ')){    
             return res.status(404).json({error : 'user not authorezition'})
         }
 
@@ -24,4 +24,3 @@ export default function authMiddleWare(req , res , next) {
         }
     
 }
-

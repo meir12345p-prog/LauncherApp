@@ -9,11 +9,11 @@ const AuthUserStore = create((set)=>({
     login : async (username , password) => {
 
         try{
-             const res = await axios.post('http://localhost:3016/api/auth/login',{
+             const res = await axios.post('http://localhost:3019/api/auth/login',{
                 username,
                 password
              })
-            
+    
              localStorage.setItem('token' , res.data.token)
              localStorage.setItem('user',JSON.stringify(res.data.user))
              set({user : res.data.user})
@@ -21,6 +21,8 @@ const AuthUserStore = create((set)=>({
              return true
         }catch(err){
             const error = err.respose?.data?.error || 'login feild'
+            console.log(err);
+            
             set({error : error})
             return false
             

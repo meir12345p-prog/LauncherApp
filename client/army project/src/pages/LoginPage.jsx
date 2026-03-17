@@ -23,16 +23,17 @@ function LoginPage() {
 
 
   return (
-    <div>
+    <section className='add-container'>
+    <div className='update-card'>
         <h1>Login page</h1>
         <form onSubmit={handleSubmit} >
-            <div>
+            <div className='input'>
                 <label>username :</label>
                 <input type="text" placeholder='enter your name' required onChange={(e)=>setUserName(e.target.value)} />
             </div>
-             <div>
+             <div className='input'>
                 <label>password :</label>
-                <input type="text" placeholder='enter your password' required onChange={(e)=>setPassword(e.target.value)} />
+                <input type="password" placeholder='enter your password' required onChange={(e)=>setPassword(e.target.value)} />
             </div>
 
             <button type='submit'>Login</button>
@@ -41,6 +42,8 @@ function LoginPage() {
         {error && (<div>{error}</div>)}
       
     </div>
+
+    </section>
   )
 }
 

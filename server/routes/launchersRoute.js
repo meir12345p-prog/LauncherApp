@@ -6,8 +6,8 @@ const router = express.Router()
 
 router.post('/',authMiddleWare , async (req , res) =>{
     try{
-         const {city , rocketType , latitude , longitude , name} = req.body
-         if(!city || !rocketType || !latitude || !longitude ||!name){
+         const {city , rocketType , latitude , longitude , name ,destroyed} = req.body
+         if(!city || !rocketType || !latitude || !longitude ||!name ||!destroyed){
             return res.status(400).json({error : 'missing input'})
          }
          if(!typeof city === String|| !typeof rocketType === String || !typeof name ===String ){
@@ -16,7 +16,11 @@ router.post('/',authMiddleWare , async (req , res) =>{
          }
 
          if(!typeof latitude === Number || !typeof longitude === Number){
-            res.status(400).json({error:'latitude and longitude need to be numbers'})
+           return res.status(400).json({error:'latitude and longitude need to be numbers'})
+         }
+
+         if(!typeof destroyed === Boolean){
+              return  res.status(400).json({error:'latitude and longitude need to be numbers'})
          }
 
          const launcher = await launchersData.create({
@@ -24,7 +28,8 @@ router.post('/',authMiddleWare , async (req , res) =>{
             rocketType,
             latitude,
             longitude,
-            name
+            name,
+            destroyed
          })
 
          res.status(200).json({message : 'rocket created successfully' , roket : launcher})
@@ -35,7 +40,7 @@ router.post('/',authMiddleWare , async (req , res) =>{
     
 })
 
-router.get('/' , async (req , res) =>{
+router.get('/',authMiddleWare , async (req , res) =>{
     try{
 
         const allLaunchers = await launchersData.find({})
@@ -45,7 +50,7 @@ router.get('/' , async (req , res) =>{
     }
 })
 
-router.get('/:id' , async (req , res) =>{
+router.get('/:id',authMiddleWare , async (req , res) =>{
     try{
         const {id} = req.params
         const launcher = await launchersData.findById(id)
@@ -58,9 +63,13 @@ router.get('/:id' , async (req , res) =>{
     }
 })
 
-router.delete('/:id' , async (req , res) =>{
+router.delete('/:id',authMiddleWare , async (req , res) =>{
     try{
+        const {user_type} = req.payload
         const { id} = req.params
+        if(user_type === 'air-army'){
+            return res.status(401).json({error : 'u dont have authorizition to delete'})
+        }
         const deleteLauncher = await launchersData.findByIdAndDelete(id)
         res.status(201).json({message : `launcher deleted successfully` , launter : deleteLauncher })
     }catch(err){
@@ -68,12 +77,19 @@ router.delete('/:id' , async (req , res) =>{
     }
 })
 
-router.put('/:id' , async (req , res) =>{
+router.put('/:id',authMiddleWare , async (req , res) =>{
     try{
-        const {id} = req.params
-        const {city , rocketType , latitude , longitude , name} = req.body        
-        if(!city && !rocketType && !latitude && !longitude && !name){
+        const {id } = req.params
+        
+        const {city , rocketType , latitude , longitude , name ,destroyed} = req.body 
+        console.log(req.body , id , "im here");
+        
+           
+        if(!city && !rocketType && !latitude && !longitude && !name && !destroyed){
+              console.log('im here');
             return res.status(400).json({error: 'not input to change'})
+          
+            
         }
         if(city){
             const launcher = await launchersData.findById(id)
@@ -99,6 +115,11 @@ router.put('/:id' , async (req , res) =>{
         if(name){
             const launcher = await launchersData.findById(id)
             launcher.name = name
+            await launcher.save()
+        }
+        if(destroyed){
+            const launcher = await launchersData.findById(id)
+            launcher.name = destroyed
             await launcher.save()
         }
         const launcher = await launchersData.findById(id)
