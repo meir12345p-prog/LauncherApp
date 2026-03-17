@@ -2,8 +2,8 @@ import { create } from "zustand";
 import axios from "axios";
 
 const AuthUserStore = create((set)=>({
-    token : null,
-    user : null,
+    token :localStorage.getItem('token') || null,
+    user :location.getItem('user') || null,
     error : null,
 
     login : async (username , password) => {
